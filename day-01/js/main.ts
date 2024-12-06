@@ -4,8 +4,6 @@ const lines = input.split(/\n/);
 const leftList = [];
 const rightList = [];
 
-console.log("Lines:", lines.length);
-
 for (const line of lines) {
 	if (line === "") continue;
 
