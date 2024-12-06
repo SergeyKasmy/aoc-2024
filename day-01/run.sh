@@ -11,4 +11,12 @@ echo "-- C#"
 cd ./c#
 echo ' > dotnet run'
 dotnet run
+echo
+cd ..
+
+echo "-- Rust"
+cd ./rust
+echo ' > cargo run --release'
+cargo run --release
+echo
 cd ..
