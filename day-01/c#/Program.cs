@@ -2,9 +2,9 @@
 
 class Program
 {
-	static void Main()
+	static void Main(string[] args)
 	{
-		var input = File.ReadLines("../input.txt");
+		var input = File.ReadLines(args[0]);
 
 		var leftList = new List<int>();
 		var rightList = new List<int>();

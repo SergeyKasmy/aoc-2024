@@ -1,15 +1,21 @@
-use std::collections::{HashMap, HashSet};
-
-const INPUT: &str = include_str!("../../input.txt");
+use std::{
+    collections::{HashMap, HashSet},
+    env, fs,
+};
 
 fn main() {
-    let (mut left, mut right): (Vec<i32>, Vec<i32>) = INPUT
-        .lines()
-        .map(|line| {
-            let (left, right) = line.split_once("   ").unwrap();
-            (left.parse::<i32>().unwrap(), right.parse::<i32>().unwrap())
-        })
-        .unzip();
+    let (mut left, mut right): (Vec<i32>, Vec<i32>) = fs::read_to_string(
+        env::args()
+            .nth(1)
+            .expect("input.txt file path not provided"),
+    )
+    .expect("couldn't read input.txt")
+    .lines()
+    .map(|line| {
+        let (left, right) = line.split_once("   ").unwrap();
+        (left.parse::<i32>().unwrap(), right.parse::<i32>().unwrap())
+    })
+    .unzip();
 
     println!(
         "The total sum of the differences is {}",
@@ -33,6 +39,7 @@ fn sum_of_differences(left: &mut [i32], right: &mut [i32]) -> i32 {
 
 fn sum_of_similarities(left: &[i32], right: &[i32]) -> i32 {
     // set of all unique IDs in the left list
+    // TODO: this could be made faster by using HashSet with a faster hasher
     let left_set = left.iter().copied().collect::<HashSet<_>>();
 
     // map of all unique IDs with the key = the ID itself and the value = the number of times it appeared

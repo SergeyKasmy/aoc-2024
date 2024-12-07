@@ -1,4 +1,4 @@
-const input = Deno.readTextFileSync("../input.txt");
+const input = Deno.readTextFileSync(Deno.args[0]);
 const lines = input.split(/\n/);
 
 const leftList = [];
