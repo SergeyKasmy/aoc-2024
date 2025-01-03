@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "7T4I5H5aahOUYQjGlJqbsYOrnT4H2OfvBXGPO27pdnidn97ZrGcqo4+iORxHJiQzepcgAxQE+UpgcVItNMGyig==",
+  "dgSpecHash": "duMawMI0ahFclKUbTiW/HPCY2hh1VFvVvGzyz/33DSshLTdbB3RMR1vjlixgUc/0S97bIXtXbhZ9SCQQaISCEA==",
   "success": true,
   "projectFilePath": "/mnt/raid/dev/projects/advent-of-code/2024/day-01/c#/day-01.csproj",
   "expectedPackageFiles": [
-    "/home/ciren/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.10/microsoft.aspnetcore.app.ref.8.0.10.nupkg.sha512"
+    "/home/ciren/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.11/microsoft.aspnetcore.app.ref.8.0.11.nupkg.sha512"
   ],
   "logs": []
 }

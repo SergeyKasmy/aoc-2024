@@ -9,6 +9,12 @@ run_solution \
 	"deno run --allow-read=.. main.ts ../input.txt"
 
 run_solution \
+	"C#" \
+	"c#" \
+	"dotnet build -c Release" \
+	"./bin/Release/net8.0/day-02 ../input.txt"
+
+run_solution \
 	"Rust" \
 	"rust" \
 	"cargo build --release" \
@@ -16,4 +22,5 @@ run_solution \
 
 hyperfine --shell=none --warmup=50 \
 	'deno run --allow-read=. js/main.ts input.txt' \
+	'c#/bin/Release/net8.0/day-02 input.txt' \
 	'rust/target/release/day-02 input.txt'

@@ -15,7 +15,7 @@ run_solution() {
 		eval "$build_command"
 	fi
 
-	echo " > $run_command"
+	echo "\n > $run_command"
 	eval "$run_command"
 
 	echo
