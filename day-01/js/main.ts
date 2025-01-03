@@ -12,8 +12,14 @@ for (const line of lines) {
 	rightList.push(Number(sides[1]));
 }
 
-console.log("The total sum of the differences is", sumOfDifferences(leftList, rightList));
-console.log("The total sum of the similarities is", sumOfSimilarities(leftList, rightList));
+console.log(
+	"The total sum of the differences is",
+	sumOfDifferences(leftList, rightList),
+);
+console.log(
+	"The total sum of the similarities is",
+	sumOfSimilarities(leftList, rightList),
+);
 
 // part 1
 function sumOfDifferences(leftList: number[], rightList: number[]): number {
