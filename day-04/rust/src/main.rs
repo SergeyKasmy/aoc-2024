@@ -2,6 +2,7 @@ use std::{env, fs};
 
 use directions::{ALL_DIRECTIONS, DIAG_DIRECTIONS};
 
+type Grid = Vec<Vec<char>>;
 type Direction<const N: usize> = [(isize, isize); N];
 
 #[rustfmt::skip]
@@ -73,7 +74,7 @@ fn main() {
 }
 
 fn find_word_in_grid<const N: usize, const COUNT_2_FOR_1: bool>(
-    grid: &Vec<Vec<char>>,
+    grid: &Grid,
     word: [char; N],
     directions: &[Direction<N>],
 ) -> usize {
@@ -100,7 +101,7 @@ fn find_word_in_grid<const N: usize, const COUNT_2_FOR_1: bool>(
 
 /// Returns the number of the word that could be reached in the specified directions from the current position in the grid
 fn word_count_from_pos<const N: usize>(
-    grid: &Vec<Vec<char>>,
+    grid: &Grid,
     word: [char; N],
     directions: &[Direction<N>],
     pos: (usize, usize),
@@ -122,11 +123,7 @@ fn word_count_from_pos<const N: usize>(
 }
 
 /// Returns the value of the element by the offset from a position
-fn get_by_offset(
-    grid: &Vec<Vec<char>>,
-    pos: (usize, usize),
-    offset: (isize, isize),
-) -> Option<char> {
+fn get_by_offset(grid: &Grid, pos: (usize, usize), offset: (isize, isize)) -> Option<char> {
     grid.get(offset_from_index(pos.0, offset.0))?
         .get(offset_from_index(pos.1, offset.1))
         .copied()
