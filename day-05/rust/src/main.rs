@@ -1,9 +1,6 @@
-use std::{
-    collections::{HashMap, HashSet},
-    env, fs,
-};
+use std::{cmp::Ordering, env, fs};
 
-type Page = u32;
+type Page = usize;
 
 fn main() {
     let input = fs::read_to_string(
@@ -15,30 +12,38 @@ fn main() {
 
     let (rules, updates) = input.split_once("\n\n").unwrap();
 
-    let rules = parse_rules(rules);
-    let updates = parse_updates(updates);
+    let order = parse_rules(rules);
+    let mut updates = parse_updates(updates);
 
-    let midpoint_sum = updates
-        .iter()
-        .map(|upd| midpoint_if_correctly_ordered(upd, &rules).unwrap_or(0))
-        .sum::<u32>();
+    let mut ordered_midpoint_sum = 0;
+    let mut unordered_midpoint_sum = 0;
 
-    println!("Sum of midpoints of all properly ordered updates is {midpoint_sum}");
+    for update in &mut updates {
+        let midpoint = midpoints(update, &order);
+
+        if midpoint.is_sorted {
+            ordered_midpoint_sum += midpoint.value;
+        } else {
+            unordered_midpoint_sum += midpoint.value;
+        }
+    }
+
+    println!("Sum of midpoints of all properly ordered updates is {ordered_midpoint_sum}");
+    println!("Sum of midpoints of all manually ordered updates is {unordered_midpoint_sum}");
 }
 
-fn parse_rules(rules: &str) -> HashMap<Page, HashSet<Page>> {
-    rules.lines().fold(HashMap::new(), |mut acc, line| {
-        let (page, before) = line.split_once('|').unwrap();
-        let page = page.parse().unwrap();
+fn parse_rules(rules: &str) -> [[Ordering; 100]; 100] {
+    rules
+        .lines()
+        .fold([[Ordering::Greater; 100]; 100], |mut acc, line| {
+            let (page, must_be_after) = line.split_once('|').unwrap();
+            let page: Page = page.parse().unwrap();
+            let must_be_after: Page = must_be_after.parse().unwrap();
 
-        acc.entry(page)
-            .and_modify(|before_pages| {
-                before_pages.insert(before.parse().unwrap());
-            })
-            .or_default();
+            acc[page][must_be_after] = Ordering::Less;
 
-        acc
-    })
+            acc
+        })
 }
 
 fn parse_updates(updates: &str) -> Vec<Vec<Page>> {
@@ -48,23 +53,24 @@ fn parse_updates(updates: &str) -> Vec<Vec<Page>> {
         .collect()
 }
 
-fn midpoint_if_correctly_ordered(
-    update: &[Page],
-    rules: &HashMap<Page, HashSet<Page>>,
-) -> Option<Page> {
-    // check correct order in reverse
-    for (idx, page) in update.iter().enumerate().rev() {
-        let Some(rule) = rules.get(page) else {
-            continue;
-        };
+struct Midpoint {
+    value: Page,
+    is_sorted: bool,
+}
 
-        for page_must_be_after in rule {
-            // a page that must be after the current one is before
-            if update[..idx].contains(page_must_be_after) {
-                return None;
-            }
-        }
+fn midpoints(update: &mut [Page], order: &[[Ordering; 100]; 100]) -> Midpoint {
+    let is_sorted = update.is_sorted_by(|&a, &b| order[a][b] == Ordering::Less);
+
+    let midpoint = if is_sorted {
+        update[update.len() / 2]
+    } else {
+        let (_, &mut midpoint, _) =
+            update.select_nth_unstable_by(update.len() / 2, |&a, &b| order[a][b]);
+        midpoint
+    };
+
+    Midpoint {
+        value: midpoint,
+        is_sorted,
     }
-
-    Some(update[update.len() / 2])
 }
