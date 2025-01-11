@@ -1,16 +1,14 @@
+use aoc::{Grid, Point};
 use std::{collections::HashSet, env, fmt::Display, fs};
 
 const GRID_SIZE: usize = 130;
 
 #[derive(Clone)]
 struct Map {
-    grid: Grid,
+    grid: Grid<Element, GRID_SIZE>,
     guard: Guard,
     history: History,
 }
-
-#[derive(Clone)]
-struct Grid([[Element; GRID_SIZE]; GRID_SIZE]);
 
 #[derive(Clone, Copy)]
 enum Element {
@@ -21,8 +19,7 @@ enum Element {
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 struct Guard {
-    x: isize,
-    y: isize,
+    pos: Point<isize>,
     facing: Facing,
 }
 
@@ -88,7 +85,7 @@ fn part2(mut map: Map) -> usize {
                 continue;
             };
 
-            if map.guard.x as usize == i && map.guard.y as usize == j {
+            if map.guard.pos.x as usize == i && map.guard.pos.y as usize == j {
                 // don't add obsticles at the current guard pos
                 // assume we can't loop the guard in the default map config
                 continue;
@@ -118,8 +115,7 @@ impl Map {
                     '^' => {
                         grid[row][column] = Element::Air;
                         guard = Some(Guard {
-                            x: row as isize,
-                            y: column as isize,
+                            pos: Point { x: row, y: column }.into(),
                             facing: Facing::Up,
                         });
                     }
@@ -137,16 +133,18 @@ impl Map {
 
     /// Returns true if the guard went off the map
     fn step(&mut self) -> bool {
-        let (next_x, next_y) = self.guard.next();
+        let Some(next_pos) = self.guard.next().as_usize() else {
+            return true;
+        };
 
-        let Some(next) = self.grid.get(next_x, next_y) else {
+        let Some(next) = self.grid.get(next_pos) else {
             return true;
         };
 
         match next {
             Element::Air | Element::Path => {
                 self.guard.move_forwards();
-                self.grid.set_path(next_x, next_y);
+                self.grid[next_pos] = Element::Path;
             }
             Element::Obsticle => self.guard.turn_right(),
         }
@@ -176,36 +174,19 @@ impl Map {
     }
 }
 
-impl Grid {
-    fn get(&self, x: isize, y: isize) -> Option<Element> {
-        let x: usize = x.try_into().ok()?;
-        let y: usize = y.try_into().ok()?;
-
-        self.0.get(x)?.get(y).copied()
-    }
-
-    fn set_path(&mut self, x: isize, y: isize) {
-        let x: usize = x.try_into().expect("invalid x");
-        let y: usize = y.try_into().expect("invalid y");
-
-        self.0[x][y] = Element::Path;
-    }
-}
-
 impl Guard {
-    fn next(&self) -> (isize, isize) {
+    fn next(&self) -> Point<isize> {
         let mut new_guard = self.clone();
         new_guard.move_forwards();
-
-        (new_guard.x, new_guard.y)
+        new_guard.pos
     }
 
     fn move_forwards(&mut self) {
         match self.facing {
-            Facing::Up => self.x -= 1,
-            Facing::Down => self.x += 1,
-            Facing::Left => self.y -= 1,
-            Facing::Right => self.y += 1,
+            Facing::Up => self.pos.x -= 1,
+            Facing::Down => self.pos.x += 1,
+            Facing::Left => self.pos.y -= 1,
+            Facing::Right => self.pos.y += 1,
         }
     }
 
@@ -225,7 +206,7 @@ impl Display for Map {
             for (j, elem) in line.iter().enumerate() {
                 let ch = match elem {
                     Element::Air | Element::Path
-                        if self.guard.x == i as isize && self.guard.y == j as isize =>
+                        if self.guard.pos.x == i as isize && self.guard.pos.y == j as isize =>
                     {
                         '*'
                     }
