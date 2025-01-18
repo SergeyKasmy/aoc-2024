@@ -1,5 +1,5 @@
 use aoc::{Grid, Point};
-use std::{collections::HashSet, env, fmt::Display, fs};
+use std::{env, fmt::Display, fs};
 
 const GRID_SIZE: usize = 130;
 
@@ -7,7 +7,7 @@ const GRID_SIZE: usize = 130;
 struct Map {
     grid: Grid<Element, GRID_SIZE>,
     guard: Guard,
-    history: History,
+    history: Option<History>,
 }
 
 #[derive(Clone, Copy)]
@@ -17,13 +17,13 @@ enum Element {
     Obsticle,
 }
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug)]
 struct Guard {
     pos: Point<isize>,
     facing: Facing,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug)]
 enum Facing {
     Up,
     Down,
@@ -31,11 +31,9 @@ enum Facing {
     Right,
 }
 
-#[derive(Clone)]
-enum History {
-    No,
-    Yes(HashSet<Guard>),
-}
+#[derive(Clone, Debug)]
+// 4 = the number of facing values that can exist
+struct History([[[bool; 4]; GRID_SIZE]; GRID_SIZE]);
 
 #[derive(PartialEq, Eq, Debug)]
 enum WalkResult {
@@ -74,7 +72,7 @@ fn part1(mut map: Map) -> usize {
 
 fn part2(mut map: Map) -> usize {
     let mut looped = 0;
-    map.history = History::Yes(HashSet::new());
+    map.history = Some(History::default());
 
     for i in 0..GRID_SIZE {
         for j in 0..GRID_SIZE {
@@ -127,7 +125,7 @@ impl Map {
         Map {
             grid: Grid(grid),
             guard: guard.expect("guard not found"),
-            history: History::No,
+            history: None,
         }
     }
 
@@ -166,8 +164,8 @@ impl Map {
 
     /// Returns true if the guard has never been in this position
     fn save_current_pos(&mut self) -> bool {
-        if let History::Yes(history) = &mut self.history {
-            return history.insert(self.guard.clone());
+        if let Some(history) = &mut self.history {
+            return history.insert(&self.guard);
         }
 
         true
@@ -200,6 +198,25 @@ impl Guard {
     }
 }
 
+impl History {
+    // Returns true if the guard has never been in this position
+    fn insert(&mut self, guard: &Guard) -> bool {
+        let pos = guard
+            .pos
+            .as_usize()
+            .expect("An out of range guard pos can't be saved");
+        assert!(pos.x < GRID_SIZE, "Guard pos x bigger than grid size");
+        assert!(pos.y < GRID_SIZE, "Guard pos y bigger than grid size");
+
+        let cell = &mut self.0[pos.x][pos.y][guard.facing as usize];
+
+        let is_already_present = *cell;
+        *cell = true;
+
+        !is_already_present
+    }
+}
+
 impl Display for Map {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (i, line) in self.grid.0.iter().enumerate() {
@@ -222,5 +239,11 @@ impl Display for Map {
         }
 
         Ok(())
+    }
+}
+
+impl Default for History {
+    fn default() -> Self {
+        Self([[[false; 4]; GRID_SIZE]; GRID_SIZE])
     }
 }
